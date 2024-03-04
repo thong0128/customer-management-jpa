@@ -1,2 +1,6 @@
-package com.codegym.customermanagement.repository;public interface ICustomerRepository {
+package com.codegym.customermanagement.repository;
+
+import com.codegym.customermanagement.model.Customer;
+
+public interface ICustomerRepository extends IGenerateRepository<Customer>{
 }

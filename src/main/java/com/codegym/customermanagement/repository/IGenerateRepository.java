@@ -2,9 +2,9 @@ package com.codegym.customermanagement.repository;
 
 import java.util.List;
 
-public interface ICustomerRepository<T> {
+public interface IGenerateRepository<T> {
     List<T> findAll();
-    T findById(int id);
+    T findById(Long id);
     void save(T t);
     void remove(Long id);
 }
