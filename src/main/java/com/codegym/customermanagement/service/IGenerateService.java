@@ -1,13 +1,14 @@
 package com.codegym.customermanagement.service;
 
-import java.util.List;
+import java.util.Optional;
 
 public interface IGenerateService<T> {
-    List<T> findAll();
+    Iterable<T> findAll();
 
     void save(T t);
 
-    T findById(Long id);
+    Optional<T> findById(Long id);
 
     void remove(Long id);
+
 }

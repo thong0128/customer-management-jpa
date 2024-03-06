@@ -1,5 +1,7 @@
 package com.codegym.customermanagement.config;
 
+import com.codegym.customermanagement.formatter.ProvinceFormatter;
+import com.codegym.customermanagement.service.impl.ProvinceService;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
@@ -7,6 +9,8 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.format.FormatterRegistry;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
@@ -30,7 +34,11 @@ import java.util.Properties;
 @EnableWebMvc
 @EnableTransactionManagement
 @ComponentScan(basePackages = "com.codegym.customermanagement")
+@EnableJpaRepositories(basePackages = "com.codegym.customermanagement.repository")
 public class AppConfiguration implements WebMvcConfigurer, ApplicationContextAware {
+    public static final String SQL_USERNAME = "root";
+    public static final String SQL_PASSWORD = "D4tRSzbc";
+    public static final String SQL_URL = "jdbc:mysql://localhost:3306/cms";
     private ApplicationContext applicationContext;
 
     @Override
@@ -39,10 +47,10 @@ public class AppConfiguration implements WebMvcConfigurer, ApplicationContextAwa
     }
 
     @Bean
-    public SpringResourceTemplateResolver templateResolver() {
+    public SpringResourceTemplateResolver templateResolver(){
         SpringResourceTemplateResolver templateResolver = new SpringResourceTemplateResolver();
         templateResolver.setApplicationContext(this.applicationContext);
-        templateResolver.setPrefix("/WEB-INF/views/");
+        templateResolver.setPrefix("/WEB-INF");
         templateResolver.setSuffix(".html");
         templateResolver.setTemplateMode(TemplateMode.HTML);
         templateResolver.setCharacterEncoding("UTF-8");
@@ -61,21 +69,20 @@ public class AppConfiguration implements WebMvcConfigurer, ApplicationContextAwa
         viewResolver.setCharacterEncoding("UTF-8");
         return viewResolver;
     }
-    @Bean
-    public DataSource dataSource() {
-        DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName("com.mysql.jdbc.Driver");
-        dataSource.setUrl("jdbc:mysql://localhost:3306/cms");
-        dataSource.setUsername("root");
-        dataSource.setPassword("D4tRSzbc");
-        return dataSource;
-    }
-
-    public Properties additionalProperties(){
+    public Properties additionalProperties() {
         Properties properties = new Properties();
         properties.setProperty("hibernate.hbm2ddl.auto", "update");
         properties.setProperty("hibernate.dialect", "org.hibernate.dialect.MySQL8Dialect");
         return properties;
+    }
+    @Bean
+    public DataSource dataSource() {
+        DriverManagerDataSource dataSource = new DriverManagerDataSource();
+        dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
+        dataSource.setUrl(SQL_URL);
+        dataSource.setUsername(SQL_USERNAME);
+        dataSource.setPassword(SQL_PASSWORD);
+        return dataSource;
     }
     @Bean
     public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
@@ -92,9 +99,14 @@ public class AppConfiguration implements WebMvcConfigurer, ApplicationContextAwa
     public EntityManager entityManager(EntityManagerFactory entityManagerFactory) {
         return entityManagerFactory.createEntityManager();
     }
-    @Bean public PlatformTransactionManager transactionManager(EntityManagerFactory emf) {
+    @Bean
+    public PlatformTransactionManager transactionManager(EntityManagerFactory emf) {
         JpaTransactionManager transactionManager = new JpaTransactionManager();
         transactionManager.setEntityManagerFactory(emf);
         return transactionManager;
+    }
+    @Override
+    public void addFormatters(FormatterRegistry registry) {
+        registry.addFormatter(new ProvinceFormatter(applicationContext.getBean(ProvinceService.class)));
     }
 }
